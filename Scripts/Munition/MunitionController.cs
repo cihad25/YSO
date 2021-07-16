@@ -1,36 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 
 public class MunitionController : MonoBehaviour
 {
-    [Header("DEBUG")]
-    public Text _vitesseTxt;
-    public Text _vitesseRotationTxt;
-    public void Plus()
-    {
-        _speed++;
-        //_speedRotation += 2;
-    }
-    public void Moins()
-    {
-        _speed--;
-        //_speedRotation-= 2;
-
-    }
-    public void PlusRot()
-    {
-        _speedRotation ++;
-    }
-    public void MoinsRot()
-    {
-        _speedRotation -- ;
-
-    }
-
-
     // INSPECTEUR
     [Header("Parametres Globaux")]
     [SerializeField]
@@ -42,15 +16,10 @@ public class MunitionController : MonoBehaviour
     [Header("Parametres Joystick")] 
     [SerializeField]
     private FloatingJoystickJ1 joystick;
-    [SerializeField]
-    private float _sensibilitéJoystickHorizontal = 0.2f; 
-    [SerializeField]
-    private float _sensibilitéJoystickVertical = 0.2f;
 
     // VARIABLES/COMPOSANT PRIVEES
     private Transform _munitionTransform;
     private CharacterController _characterController;
-    private Rigidbody _munitionRigidbody;
     public bool _desactiveNavMesh = false;
 
     public bool DesactiveNavmesh { get => _desactiveNavMesh; set => _desactiveNavMesh = value; }
@@ -60,24 +29,14 @@ public class MunitionController : MonoBehaviour
     {
         _munitionTransform = GetComponent<Transform>();
         _characterController = GetComponent<CharacterController>();
-        //_munitionRigidbody = GetComponent<Rigidbody>();
     }
     void Update()
     {
-        _vitesseTxt.text = _speed.ToString();
-        _vitesseRotationTxt.text = _speedRotation.ToString();
-
-
-
         MunitionMove();
-        //MunitionMoveTactile();
-
-
     }
 
     private void MunitionMove()
     {
-        // donner au joueur une vitesse vers l'avant
         Vector3 _moveVector = _munitionTransform.forward * _speed;
 
         // Pour obtenir la direction
@@ -88,23 +47,18 @@ public class MunitionController : MonoBehaviour
         // Evite de faire une rotation sur soi
         float _maxX = Quaternion.LookRotation(_moveVector + _dir).eulerAngles.x;
 
+        // ROTATION
+        if (_maxX < 90 && _maxX > 70 || _maxX > 270 && _maxX < 290)
+        {
+            // C'est trop ne fait rien !
+        }
+        else
+        {
+            // Ajouter la direction sur le mouvement en cours
+            _moveVector += _dir;
 
-        //if (joystick.Horizontal >= _sensibilitéJoystickHorizontal || joystick.Horizontal <= -_sensibilitéJoystickHorizontal &&
-        //    joystick.Vertical >= _sensibilitéJoystickVertical || joystick.Horizontal <= -_sensibilitéJoystickVertical)
-        //{
-            // ROTATION
-            if (_maxX < 90 && _maxX > 70 || _maxX > 270 && _maxX < 290)
-            {
-                // C'est trop ne fait rien !
-            }
-            else
-            {
-                // Ajouter la direction sur le mouvement en cours
-                _moveVector += _dir;
-
-                _munitionTransform.rotation = Quaternion.LookRotation(_moveVector);
-            }
-        //}
+            _munitionTransform.rotation = Quaternion.LookRotation(_moveVector);
+        }
 
         // J'applique mon deplacement
         _characterController.Move(_moveVector * Time.deltaTime);
